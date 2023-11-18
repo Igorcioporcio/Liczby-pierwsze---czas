@@ -1,0 +1,56 @@
+#include <iostream>
+#include <cmath>
+#include <chrono>
+#include <functional>
+#include <vector>
+
+using namespace std;
+
+bool is_prime_naive1(int k) {
+    if (k < 2) return false;
+    for (int i = 2; i < k; ++i) {
+        if (k % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool is_prime_naive2(int k) {
+    if (k < 2) return false;
+    for (int i = 2; i <= sqrt(k); ++i) {
+        if (k % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+pair<int, double> measure_time(function<bool(int)> func, int n) {
+    auto start_time = chrono::high_resolution_clock::now();
+
+    int count = 0;
+    for (int i = 1; i <= n; ++i) {
+        if (func(i)) {
+            count++;
+        }
+    }
+
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed_time = end_time - start_time;
+
+    return {count, elapsed_time.count()};
+}
+
+int main() {
+    vector<int> ns = {1000, 10000, 100000, 1000000};
+
+    for (int n : ns) {
+        cout << "\nWyniki dla n = " << n << ":\n";
+
+        auto result_time_naive2 = measure_time(is_prime_naive2, n);
+        cout << "Naiwny algorytm 2: " << result_time_naive2.first << " liczb pierwszych, Czas: " << result_time_naive2.second << " sekund\n";
+    }
+
+    return 0;
+}
