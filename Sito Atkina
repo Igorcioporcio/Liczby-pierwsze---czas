@@ -1,0 +1,76 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <chrono>
+#include <functional>
+
+using namespace std;
+
+vector<int> sieve_of_atkin(int limit) {
+    vector<bool> sieve(limit + 1, false);
+    vector<int> result;
+
+    int sqrt_limit = static_cast<int>(sqrt(limit));
+
+    for (int x = 1; x <= sqrt_limit; ++x) {
+        for (int y = 1; y <= sqrt_limit; ++y) {
+            int n = 4 * x * x + y * y;
+            if (n <= limit && (n % 12 == 1 || n % 12 == 5)) {
+                sieve[n] = !sieve[n];
+            }
+
+            n = 3 * x * x + y * y;
+            if (n <= limit && n % 12 == 7) {
+                sieve[n] = !sieve[n];
+            }
+
+            n = 3 * x * x - y * y;
+            if (x > y && n <= limit && n % 12 == 11) {
+                sieve[n] = !sieve[n];
+            }
+        }
+    }
+
+    for (int i = 5; i <= sqrt_limit; ++i) {
+        if (sieve[i]) {
+            for (int j = i * i; j <= limit; j += i * i) {
+                sieve[j] = false;
+            }
+        }
+    }
+
+    for (int i = 2; i <= 3; ++i) {
+        result.push_back(i);
+    }
+
+    for (int i = 5; i <= limit; ++i) {
+        if (sieve[i]) {
+            result.push_back(i);
+        }
+    }
+
+    return result;
+}
+
+pair<int, double> measure_time(function<vector<int>(int)> func, int n) {
+    auto start_time = chrono::high_resolution_clock::now();
+
+    vector<int> primes = func(n);
+
+    auto end_time = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed_time = end_time - start_time;
+
+    return {primes.size(), elapsed_time.count()};
+}
+
+int main() {
+    vector<int> ns = {1000, 10000, 100000, 1000000};
+
+    for (int n : ns) {
+        cout << "\nWyniki dla n = " << n << ":\n";
+        auto result_time = measure_time(sieve_of_atkin, n);
+        cout << "Sito Atkina: " << result_time.first << " liczb pierwszych, Czas: " << result_time.second << " sekund\n";
+    }
+
+    return 0;
+}
